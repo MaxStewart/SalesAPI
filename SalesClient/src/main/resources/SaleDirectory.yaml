@@ -1,0 +1,252 @@
+swagger: '2.0'
+info:
+  title: Sale Directory
+  version: '1.0'
+  description: A service that allows a client to add and maintain a directory of sales from different users.
+basePath: /api
+consumes:
+  - application/json
+produces:
+  - application/json
+schemes:
+  - http
+tags:
+  - name: Directory
+    description: Directory of sales
+  - name: Sale
+    description: A sale in the directory
+  - name: Summary
+    description: A summary of the sales data from a customer
+paths:
+  /directory:
+    get:
+      operationId: Get all the sales
+      summary: Get all of the sales
+      description: Get every placed sale in the directory.
+      tags:
+        - Directory
+      responses:
+        '200':
+          description: Response contains all of the accounts in the directory.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Sale'
+        '404':
+          description: No sales found
+        '400':
+          $ref: '#/responses/400'
+        '500':
+          $ref: '#/responses/500'
+        '501':
+          $ref: '#/responses/501'
+        '503':
+          $ref: '#/responses/503'
+    post:
+      operationId: Create new sale
+      summary: Create a new sale.
+      description: Add a new sale to the directory.
+      tags:
+        - Directory
+      responses:
+        '201':
+          description: >-
+            <p>Sale successfully created.</p>
+            <p>The new sale is returned in the response.</p>
+          schema:
+            $ref: '#/definitions/Sale'
+        '422':
+          description: >-
+            Sale <b>NOT</b> created.  A sale with that ID already exists.
+        '400':
+          $ref: '#/responses/400'
+        '500':
+          $ref: '#/responses/500'
+        '501':
+          $ref: '#/responses/501'
+        '503':
+          $ref: '#/responses/503'
+      parameters:
+        - $ref: '#/parameters/sale'
+  '/directory/sale/{id}':
+    delete:
+      operationId: delete sale
+      summary: Delete a sale from the directory.
+      description: Delete the sale that matches the supplied ID from the system.
+      tags:
+        - Sale
+      responses:
+        '204':
+          description: Sale successfully deleted.
+        '404':
+          $ref: '#/responses/404'
+        '400':
+          $ref: '#/responses/400'
+        '500':
+          $ref: '#/responses/500'
+        '501':
+          $ref: '#/responses/501'
+        '503':
+          $ref: '#/responses/503'
+    parameters:
+      - name: id
+        in: path
+        description: The ID of the sale.
+        required: true
+        type: string
+        
+  '/directory/sale/customer/{id}':
+    get:
+      tags:
+        - Sale
+      summary: Get the sales of a specific customer
+      description: Get all the sales of a customer that matches the supplied customer ID
+      responses:
+        200:
+          description: Response contains all the sales for a specific customer.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Sale'
+        404:
+          description: There are no customers with that ID
+        '400':
+          $ref: '#/responses/400'
+        '500':
+          $ref: '#/responses/500'
+        '501':
+          $ref: '#/responses/501'
+        '503':
+          $ref: '#/responses/503'
+    parameters: 
+      - name: id
+        in: path
+        description: The ID of the customer
+        required: true
+        type: string
+  '/directory/sale/customer/{id}/summary':
+    parameters: 
+      - name: id
+        in: path
+        description: The ID of the customer
+        required: true
+        type: string
+    get:
+      tags:
+        - Summary
+      summary: Get a summary of a customers sales
+      description: Aggregate the data from a customer
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Summary'
+        404: 
+          description: There are no customers with that ID
+        '400':
+          $ref: '#/responses/400'
+        '500':
+          $ref: '#/responses/500'
+        '501':
+          $ref: '#/responses/501'
+        '503':
+          $ref: '#/responses/503'
+   
+responses:
+  '400':
+    description: The server couldn't understand the response
+  '500':
+    description: Internal server error. Please try again.
+  '501':
+    description: Service not inplemented.
+  '503':
+    description: Service unavaliable.
+  '404':
+    description: No sale matching the supplied ID was found.
+parameters:
+  sale:
+    name: sale
+    description: the deatils of a sale
+    in: body
+    required: true
+    schema:
+      $ref: '#/definitions/Sale'
+  customer:
+    description: the customer of a sale
+    name: customer
+    in: body
+    required: true
+    schema:
+      $ref: '#/definitions/Customer'
+definitions:
+  Summary:
+    type: object
+    description: The summary of sales data from a customer
+    properties:
+      numberOfSales:
+        type: integer
+      totalPayment:
+        type: number
+      group:
+        type: string
+      uri:
+        type: string
+  Customer:
+    type: object
+    description: A customer attatched to an order
+    properties:
+      id:
+        type: string
+      email:
+        type: string
+      group:
+        type: string
+    required:
+      - id
+  saleItem:
+    type: object
+    description: the item attatched to an order
+    properties:
+      productId:
+        type: string
+      quantity:
+        type: number
+      price:
+        type: number
+  totals:
+    type: object
+    description: the payment totals attatched to an order
+    properties:
+      totalPrice:
+        type: number
+      totalTax:
+        type: number
+      totalPayment:
+        type: number
+  summary:
+    type: object
+    properties:
+      numberOfSales:
+        type: integer
+      totalPayment:
+        type: number
+      group:
+        type: string
+      uri:
+        type: string
+  Sale:
+    type: object
+    description: Details of a sale in the directory
+    properties:
+      id:
+        type: string
+      saleDate:
+        type: string
+      customer:
+        $ref: '#/definitions/Customer'
+      saleItem:
+        $ref: '#/definitions/saleItem'
+      totals:
+        $ref: '#/definitions/totals'
+      Summary:
+        $ref: '#/definitions/summary'

@@ -1,0 +1,163 @@
+swagger: '2.0'
+info:
+  title: Account Directory
+  version: '1.0'
+  description: A service that allows a client to add and maintain a directory of accounts
+basePath: /api
+consumes:
+  - application/json
+produces:
+  - application/json
+schemes:
+  - http
+tags:
+  - name: Directory
+    description: Directory of accounts
+  - name: Account
+    description: An account in the directory
+paths:
+  /directory:
+    get:
+      operationId: get all the accounts
+      summary: Get all of the registered accounts
+      description: Get every registered user account in the directory.
+      tags:
+        - Directory
+      responses:
+        '200':
+          description: Response contains all of the accounts in the directory.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Account'
+        '404':
+          description: There are no accounts.
+        '400':
+          $ref: '#/responses/400'
+        '500':
+          $ref: '#/responses/500'
+        '501':
+          $ref: '#/responses/501'
+        '503':
+          $ref: '#/responses/503'
+    post:
+      operationId: create new user account
+      summary: Create a new user account.
+      description: Add a new user to the directory.
+      tags:
+        - Directory
+      responses:
+        '201':
+          description: >-
+            <p>Account successfully created.</p>
+            <p>The URI of new account is available in the <code>uri</code> field of the response.  The new account is returned in the response.</p>
+          schema:
+            $ref: '#/definitions/Account'
+        '422':
+          description: >-
+            Account <b>NOT</b> created.  A user account with that ID already exists.
+        '400':
+          $ref: '#/responses/400'
+        '500':
+          $ref: '#/responses/500'
+        '501':
+          $ref: '#/responses/501'
+        '503':
+          $ref: '#/responses/503'
+      parameters:
+        - $ref: '#/parameters/account'
+  '/directory/user/{id}':
+    put:
+      operationId: update account
+      summary: Update an account's details.
+      description: >-
+        <p>Replace the details of an existing account that matches the supplied account ID with the details supplied in the message body.</p>
+ 
+        <p>Note that the account's ID can <b>not</b> be modified via this operation.</p>
+      tags:
+        - Account
+      responses:
+        '204':
+          description: Account successfully updated.
+        '404':
+          $ref: '#/responses/404'
+        '422':
+          description: >-
+            <p>Account <b>NOT</b> updated.</p>
+            <p>The ID in the body does not match the ID in the path.  Modifying the account's ID via this operation is not permitted.</p>
+        '400':
+          $ref: '#/responses/400'
+        '500':
+          $ref: '#/responses/500'
+        '501':
+          $ref: '#/responses/501'
+        '503':
+          $ref: '#/responses/503'
+      parameters:
+        - $ref: '#/parameters/account'
+    delete:
+      operationId: delete account
+      summary: Delete an account from the system.
+      description: Delete the account that matches the supplied ID from the system.
+      tags:
+        - Account
+      responses:
+        '204':
+          description: Account successfully deleted.
+        '404':
+          $ref: '#/responses/404'
+        '400':
+          $ref: '#/responses/400'
+        '500':
+          $ref: '#/responses/500'
+        '501':
+          $ref: '#/responses/501'
+        '503':
+          $ref: '#/responses/503'
+    parameters:
+      - name: id
+        in: path
+        description: The ID of the Account.
+        required: true
+        type: string
+responses:
+  '404':
+    description: No account matching the supplied ID was found.
+  '400':
+    description: The server couldn't understand the response
+  '500':
+    description: Internal server error. Please try again.
+  '501':
+    description: Service not inplemented.
+  '503':
+    description: Service unavaliable.
+parameters:
+  account:
+    name: account
+    description: The details of a user account
+    in: body
+    required: true
+    schema:
+      $ref: '#/definitions/Account'
+definitions:
+  Account:
+    type: object
+    description: Details of the accounts in the system.
+    properties:
+      id:
+        type: string
+      email:
+        type: string
+      username:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      group:
+        type: string
+      uri:
+        type: string
+    required: 
+      - id
+      - name
